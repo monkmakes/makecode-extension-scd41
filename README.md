@@ -1,3 +1,5 @@
+# Work In Progress -- may not work yet
+
 # Sensirion SCD41 Makecode Extension
 
 Makecode extension for the Sensirion SCD41 CO2 development board connected to the micro:bit platform.
