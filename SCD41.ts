@@ -115,6 +115,16 @@ namespace SCD41 {
     }
 
     /**
+     * calibrate to 400 ppm
+     */
+    //% blockId="SCD41_CALIBRATE_400" block="calibrate 400"
+    //% weight=80 blockGap=8
+    export function calibrate_400() {
+        // change below to correct call, this a factory reset at moment
+        pins.i2cWriteNumber(SCD41_I2C_ADDR, 0x3632, NumberFormat.UInt16BE);
+    }
+
+    /**
      * perform a factory reset
      */
     //% blockId="SCD41_PERFORM_FACTORY_RESET" block="factory reset"
