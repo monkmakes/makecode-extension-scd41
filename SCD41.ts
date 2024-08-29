@@ -48,7 +48,6 @@ namespace SCD41 {
         return words;
     }
 
-
     function calc_crc(word: number) {
         // You can thank Chat GTP for this function
         // Define the CRC-8 polynomial and initial value
@@ -90,7 +89,7 @@ namespace SCD41 {
         let crc = calc_crc(param) 
         pins.i2cWriteNumber(SCD41_I2C_ADDR, command, NumberFormat.UInt16BE, false)
         pins.i2cWriteNumber(SCD41_I2C_ADDR, param, NumberFormat.UInt16BE, false)
-        pins.i2cWriteNumber(SCD41_I2C_ADDR, crc, NumberFormat.UInt8LE, false)
+        pins.i2cWriteNumber(SCD41_I2C_ADDR, crc, NumberFormat.UInt8BE, false)
     }
 
 
@@ -175,8 +174,12 @@ namespace SCD41 {
     //% weight=80 blockGap=8
     export function calibrate_400() {
         stop_continuous_measurement();
-        sendCommand(CALIBRATE_COMMAND, 400);
-        start_continuous_measurement();
+        setTimeout(() => {
+            sendCommand(CALIBRATE_COMMAND, 400);
+            setTimeout(() => {
+                start_continuous_measurement();
+            }, 500);
+        }, 500);
     }
 
     /**
