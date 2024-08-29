@@ -28,7 +28,7 @@ namespace SCD41 {
     let READ_MEASUREMENTS_COMMAND = 0xEC05;
     let START_CONT_MEASUREMENTS_COMMAND = 0x21b1;
     let STOP_CONT_MEASUREMENTS_COMMAND = 0x3F86;
-    let CALIBRATE_COMMAND = 0x0;
+    let CALIBRATE_COMMAND = 0x362F;
     let FACTORY_RESET_COMMAND = 0x3632;
 
     start_continuous_measurement();
@@ -47,6 +47,52 @@ namespace SCD41 {
         }
         return words;
     }
+
+
+    function calc_crc(word) {
+        // You can thank Chat GTP for this function
+        // Define the CRC-8 polynomial and initial value
+        const polynomial = 0x31;  // CRC-8 polynomial (x^8 + x^2 + x + 1)
+        let crc = 0xFF;           // Initial CRC value (you may change this depending on the standard)
+    
+        // Break the 16-bit word into two bytes
+        const highByte = (word >> 8) & 0xFF; // Extract the high byte
+        const lowByte = word & 0xFF;         // Extract the low byte
+    
+        // Process the high byte
+        crc ^= highByte;
+        for (let i = 0; i < 8; i++) {
+            if (crc & 0x80) {
+                crc = (crc << 1) ^ polynomial;
+            } else {
+                crc <<= 1;
+            }
+            crc &= 0xFF; // Ensure CRC remains 8-bit
+        }
+    
+        // Process the low byte
+        crc ^= lowByte;
+        for (let i = 0; i < 8; i++) {
+            if (crc & 0x80) {
+                crc = (crc << 1) ^ polynomial;
+            } else {
+                crc <<= 1;
+            }
+            crc &= 0xFF; // Ensure CRC remains 8-bit
+        }
+    
+        return crc;
+    }
+
+    function sendCommand(command:number, param:number) {
+        // Sends a command along with arguments and CRC (CRC on params only)
+        // 2 byte command, 2 byte param, single byte CRC
+        let crc = calc_crc(param) 
+        pins.i2cWriteNumber(SCD41_I2C_ADDR, command, NumberFormat.UInt16BE, false)
+        pins.i2cWriteNumber(SCD41_I2C_ADDR, param, NumberFormat.UInt16BE, false)
+        pins.i2cWriteNumber(SCD41_I2C_ADDR, crc, NumberFormat.Int8BE, false)
+    }
+
 
     function get_data_ready_status() {
         pins.i2cWriteNumber(SCD41_I2C_ADDR, DATA_READY_COMMAND, NumberFormat.UInt16BE);
@@ -122,23 +168,25 @@ namespace SCD41 {
     }
 
     /**
-     * calibrate to 400 ppm
+     * Calibrate to 400 ppm
      */
     //% blockId="SCD41_CALIBRATE_400" block="calibrate 400"
     //% advanced=true
     //% weight=80 blockGap=8
     export function calibrate_400() {
-        // change below to correct call, this a factory reset at moment
-        pins.i2cWriteNumber(SCD41_I2C_ADDR, CALIBRATE_COMMAND, NumberFormat.UInt16BE);
+        stop_continuous_measurement();
+        sendCommand(CALIBRATE_COMMAND, 400);
+        start_continuous_measurement();
     }
 
     /**
-     * perform a factory reset
+     * Perform a factory reset
      */
     //% blockId="SCD41_PERFORM_FACTORY_RESET" block="factory reset"
     //% advanced=true
     //% weight=80 blockGap=8
     export function perform_factory_reset() {
+        // no call to persist settings needed 
         pins.i2cWriteNumber(SCD41_I2C_ADDR, FACTORY_RESET_COMMAND, NumberFormat.UInt16BE);
     }
 }
