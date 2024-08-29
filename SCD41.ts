@@ -49,7 +49,7 @@ namespace SCD41 {
     }
 
 
-    function calc_crc(word) {
+    function calc_crc(word: number) {
         // You can thank Chat GTP for this function
         // Define the CRC-8 polynomial and initial value
         const polynomial = 0x31;  // CRC-8 polynomial (x^8 + x^2 + x + 1)
