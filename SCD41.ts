@@ -1,3 +1,21 @@
+/**
+ * makecode MonkMakes CO2 Dock
+ * MonkMakes Ltd
+ * Author: Simon Monk @ https://www.monkmakes.com
+ * Date: 2024-08-29
+ * 
+ * A fork and modification of the Sensiron makecode extension here: 
+ * https://github.com/Sensirion/makecode-extension-scd41
+ * 
+ * Blocks have been renamed for compatability with other MonkMakes products
+ * and new blocks have been added for altitude compensation and calibration.
+ * 
+ */
+
+/**
+ * MonkMakes CO2 Dock
+ */
+//% color=190 weight=100 icon="\uf1bb" block="CO2 Dock"
 namespace SCD41 {
 
     const SCD41_I2C_ADDR = 0x62;
@@ -9,6 +27,7 @@ namespace SCD41 {
     let DATA_READY_COMMAND = 0xE4B8;
     let READ_MEASUREMENTS_COMMAND = 0xEC05;
     let START_CONT_MEASUREMENTS_COMMAND = 0x21b1;
+    let STOP_CONT_MEASUREMENTS_COMMAND = 0x3F86;
     let CALIBRATE_COMMAND = 0x0;
     let FACTORY_RESET_COMMAND = 0x3632;
 
@@ -52,12 +71,21 @@ namespace SCD41 {
     }
 
     /**
-     * start continuous measurement. Call this before reading measurements
+     * Start the sensor. You only need to call this if you have previously stopped readings using the [pause CO2 Dock], perhaps to save battery power.
      */
     //% blockId="SCD41_START_CONTINUOUS_MEASUREMENT" block="start CO2 Dock"
     //% weight=80 blockGap=8
     export function start_continuous_measurement() {
         pins.i2cWriteNumber(SCD41_I2C_ADDR, START_CONT_MEASUREMENTS_COMMAND, NumberFormat.UInt16BE);
+    }
+
+    /**
+     * Pause the sensor, perhaps to save battery power.
+     */
+    //% blockId="SCD41_STOP_CONTINUOUS_MEASUREMENT" block="pause CO2 Dock"
+    //% weight=80 blockGap=8
+    export function start_continuous_measurement() {
+        pins.i2cWriteNumber(SCD41_I2C_ADDR, STOP_CONT_MEASUREMENTS_COMMAND, NumberFormat.UInt16BE);
     }
 
 
