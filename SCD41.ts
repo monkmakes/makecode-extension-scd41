@@ -90,7 +90,7 @@ namespace SCD41 {
         let crc = calc_crc(param) 
         pins.i2cWriteNumber(SCD41_I2C_ADDR, command, NumberFormat.UInt16BE, false)
         pins.i2cWriteNumber(SCD41_I2C_ADDR, param, NumberFormat.UInt16BE, false)
-        pins.i2cWriteNumber(SCD41_I2C_ADDR, crc, NumberFormat.UInt8BE, false)
+        pins.i2cWriteNumber(SCD41_I2C_ADDR, crc, NumberFormat.UInt8LE, false)
     }
 
 
