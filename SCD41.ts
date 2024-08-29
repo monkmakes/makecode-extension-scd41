@@ -1,18 +1,16 @@
 namespace SCD41 {
 
-    export enum SCD41_T_UNIT {
-        //% block="C"
-        C = 0,
-        //% block="F"
-        F = 1
-    }
-
     const SCD41_I2C_ADDR = 0x62;
 
     let co2 = 0;
     let temperature = 0;
     let relative_humidity = 0;
-    let feature_set = 0;
+
+    let DATA_READY_COMMAND = 0xE4B8;
+    let READ_MEASUREMENTS_COMMAND = 0xEC05;
+    let START_CONT_MEASUREMENTS_COMMAND = 0x21b1;
+    let CALIBRATE_COMMAND = 0x0;
+    let FACTORY_RESET_COMMAND = 0x3632;
 
     init();
 
@@ -32,7 +30,7 @@ namespace SCD41 {
     }
 
     function get_data_ready_status() {
-        pins.i2cWriteNumber(SCD41_I2C_ADDR, 0xE4B8, NumberFormat.UInt16BE);
+        pins.i2cWriteNumber(SCD41_I2C_ADDR, DATA_READY_COMMAND, NumberFormat.UInt16BE);
         basic.pause(1);
         let data_ready = read_word() & 0x07FF;
         return data_ready > 0;
@@ -43,7 +41,7 @@ namespace SCD41 {
         if (!get_data_ready_status()) {
             return
         }
-        pins.i2cWriteNumber(SCD41_I2C_ADDR, 0xEC05, NumberFormat.UInt16BE);
+        pins.i2cWriteNumber(SCD41_I2C_ADDR, READ_MEASUREMENTS_COMMAND, NumberFormat.UInt16BE);
         basic.pause(1);
         let values = read_words(6);
         co2 = values[0];
@@ -54,37 +52,19 @@ namespace SCD41 {
     }
 
     /**
-     * init
-     */
-    //% blockId="SCD41_INIT" block="init"
-    //% weight=80 blockGap=8
-    export function init() {
-        start_continuous_measurement();
-    }
-
-    /**
      * start continuous measurement. Call this before reading measurements
      */
-    //% blockId="SCD41_START_CONTINUOUS_MEASUREMENT" block="start continuous measurement"
+    //% blockId="SCD41_START_CONTINUOUS_MEASUREMENT" block="start CO2 Dock"
     //% weight=80 blockGap=8
     export function start_continuous_measurement() {
-        pins.i2cWriteNumber(SCD41_I2C_ADDR, 0x21b1, NumberFormat.UInt16BE);
+        pins.i2cWriteNumber(SCD41_I2C_ADDR, START_CONT_MEASUREMENTS_COMMAND, NumberFormat.UInt16BE);
     }
 
-    /**
-     * stop continuous measurement. Call this to stop SCD41 internal measurements
-     */
-    //% blockId="SCD41_STOP_CONTINUOUS_MEASUREMENT" block="stop continuous measurement"
-    //% weight=80 blockGap=8
-    export function stop_continuous_measurement() {
-        pins.i2cWriteNumber(SCD41_I2C_ADDR, 0x3F86, NumberFormat.UInt16BE);
-        basic.pause(500);
-    }
 
     /**
      * get CO2. Call this at most once every 5 seconds, else last measurement value will be returned
      */
-    //% blockId="SCD41_GET_CO2" block="co2 %u"
+    //% blockId="SCD41_GET_CO2" block="CO2 ppm"
     //% weight=80 blockGap=8
     export function get_co2() {
         read_measurement();
@@ -94,20 +74,17 @@ namespace SCD41 {
     /**
      * get temperature. Call this at most once every 5 seconds, else last measurement value will be returned
      */
-    //% blockId="SCD41_GET_TEMPERATURE" block="temperature %u"
+    //% blockId="SCD41_GET_TEMPERATURE" block="temperature"
     //% weight=80 blockGap=8
-    export function get_temperature(unit: SCD41_T_UNIT = SCD41_T_UNIT.C) {
+    export function get_temperature() {
         read_measurement();
-        if (unit == SCD41_T_UNIT.C) {
-            return temperature;
-        }
-        return 32 + ((temperature * 9) / 5);
+        return temperature;   
     }
 
     /**
      * get relative humidity. Call this at most once every 5 seconds, else last measurement value will be returned
      */
-    //% blockId="SCD41_GET_RELATIVE_HUMIDITY" block="relative humidity %u"
+    //% blockId="SCD41_GET_RELATIVE_HUMIDITY" block="humidity"
     //% weight=80 blockGap=8
     export function get_relative_humidity() {
         read_measurement();
@@ -121,7 +98,7 @@ namespace SCD41 {
     //% weight=80 blockGap=8
     export function calibrate_400() {
         // change below to correct call, this a factory reset at moment
-        pins.i2cWriteNumber(SCD41_I2C_ADDR, 0x3632, NumberFormat.UInt16BE);
+        pins.i2cWriteNumber(SCD41_I2C_ADDR, CALIBRATE_COMMAND, NumberFormat.UInt16BE);
     }
 
     /**
@@ -130,6 +107,6 @@ namespace SCD41 {
     //% blockId="SCD41_PERFORM_FACTORY_RESET" block="factory reset"
     //% weight=80 blockGap=8
     export function perform_factory_reset() {
-        pins.i2cWriteNumber(SCD41_I2C_ADDR, 0x3632, NumberFormat.UInt16BE);
+        pins.i2cWriteNumber(SCD41_I2C_ADDR, FACTORY_RESET_COMMAND, NumberFormat.UInt16BE);
     }
 }
