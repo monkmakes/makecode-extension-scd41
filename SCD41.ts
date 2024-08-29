@@ -75,6 +75,7 @@ namespace SCD41 {
      */
     //% blockId="SCD41_START_CONTINUOUS_MEASUREMENT" block="start CO2 Dock"
     //% weight=80 blockGap=8
+    //% advanced=true
     export function start_continuous_measurement() {
         pins.i2cWriteNumber(SCD41_I2C_ADDR, START_CONT_MEASUREMENTS_COMMAND, NumberFormat.UInt16BE);
     }
@@ -83,6 +84,7 @@ namespace SCD41 {
      * Pause the sensor, perhaps to save battery power.
      */
     //% blockId="SCD41_STOP_CONTINUOUS_MEASUREMENT" block="pause CO2 Dock"
+    //% advanced=true
     //% weight=80 blockGap=8
     export function stop_continuous_measurement() {
         pins.i2cWriteNumber(SCD41_I2C_ADDR, STOP_CONT_MEASUREMENTS_COMMAND, NumberFormat.UInt16BE);
@@ -90,7 +92,7 @@ namespace SCD41 {
 
 
     /**
-     * get CO2. Call this at most once every 5 seconds, else last measurement value will be returned
+     * Get CO2 reading in ppm. Call this at most once every 5 seconds, else last measurement value will be returned
      */
     //% blockId="SCD41_GET_CO2" block="CO2 ppm"
     //% weight=80 blockGap=8
@@ -100,7 +102,7 @@ namespace SCD41 {
     }
 
     /**
-     * get temperature. Call this at most once every 5 seconds, else last measurement value will be returned
+     * Get temperature reading in degrees C. Call this at most once every 5 seconds, else last measurement value will be returned
      */
     //% blockId="SCD41_GET_TEMPERATURE" block="temperature"
     //% weight=80 blockGap=8
@@ -110,7 +112,7 @@ namespace SCD41 {
     }
 
     /**
-     * get relative humidity. Call this at most once every 5 seconds, else last measurement value will be returned
+     * Get relative humidity as a percentage. Call this at most once every 5 seconds, else last measurement value will be returned
      */
     //% blockId="SCD41_GET_RELATIVE_HUMIDITY" block="humidity"
     //% weight=80 blockGap=8
@@ -123,6 +125,7 @@ namespace SCD41 {
      * calibrate to 400 ppm
      */
     //% blockId="SCD41_CALIBRATE_400" block="calibrate 400"
+    //% advanced=true
     //% weight=80 blockGap=8
     export function calibrate_400() {
         // change below to correct call, this a factory reset at moment
@@ -133,6 +136,7 @@ namespace SCD41 {
      * perform a factory reset
      */
     //% blockId="SCD41_PERFORM_FACTORY_RESET" block="factory reset"
+    //% advanced=true
     //% weight=80 blockGap=8
     export function perform_factory_reset() {
         pins.i2cWriteNumber(SCD41_I2C_ADDR, FACTORY_RESET_COMMAND, NumberFormat.UInt16BE);
