@@ -31,7 +31,7 @@ namespace SCD41 {
     let CALIBRATE_COMMAND = 0x0;
     let FACTORY_RESET_COMMAND = 0x3632;
 
-    init();
+    start_continuous_measurement();
 
     function read_word(repeat = false) {
         let value = pins.i2cReadNumber(SCD41_I2C_ADDR, NumberFormat.UInt16BE, repeat);
