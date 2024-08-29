@@ -182,6 +182,7 @@ namespace SCD41 {
 
     /**
      * Set Altitude Compensation
+     * @param meters
      */
     //% blockId="SCD41_SET_ALT" block="set altitude"
     //% advanced=true
