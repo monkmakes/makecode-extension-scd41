@@ -173,13 +173,9 @@ namespace SCD41 {
     //% advanced=true
     //% weight=80 blockGap=8
     export function calibrate_400() {
-        stop_continuous_measurement();
-        setTimeout(() => {
-            sendCommand(CALIBRATE_COMMAND, 400);
-            setTimeout(() => {
-                start_continuous_measurement();
-            }, 500);
-        }, 500);
+        //stop_continuous_measurement();
+        sendCommand(CALIBRATE_COMMAND, 400);
+        //start_continuous_measurement();
     }
 
     /**
