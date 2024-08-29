@@ -84,7 +84,7 @@ namespace SCD41 {
      */
     //% blockId="SCD41_STOP_CONTINUOUS_MEASUREMENT" block="pause CO2 Dock"
     //% weight=80 blockGap=8
-    export function start_continuous_measurement() {
+    export function stop_continuous_measurement() {
         pins.i2cWriteNumber(SCD41_I2C_ADDR, STOP_CONT_MEASUREMENTS_COMMAND, NumberFormat.UInt16BE);
     }
 
