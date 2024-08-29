@@ -29,6 +29,8 @@ namespace SCD41 {
     let START_CONT_MEASUREMENTS_COMMAND = 0x21b1;
     let STOP_CONT_MEASUREMENTS_COMMAND = 0x3F86;
     let CALIBRATE_COMMAND = 0x362F;
+    let SET_ALTITUDE_COMMAND = 0x2427;
+    let GET_ALTITUDE_COMMAND = 0x2322;
     let FACTORY_RESET_COMMAND = 0x3632;
 
     start_continuous_measurement();
@@ -175,6 +177,18 @@ namespace SCD41 {
     export function calibrate_400() {
         //stop_continuous_measurement();
         sendCommand(CALIBRATE_COMMAND, 400);
+        //start_continuous_measurement();
+    }
+
+    /**
+     * Set Altitude Compensation
+     */
+    //% blockId="SCD41_SET_ALT" block="set altitude"
+    //% advanced=true
+    //% weight=80 blockGap=8
+    export function set_altitude(m:number) {
+        //stop_continuous_measurement();
+        sendCommand(SET_ALTITUDE_COMMAND, m);
         //start_continuous_measurement();
     }
 
