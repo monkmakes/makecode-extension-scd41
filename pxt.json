@@ -1,7 +1,7 @@
 {
-    "name": "SCD41",
+    "name": "MonkMakes CO2 Dock / SCD41",
     "version": "0.1.0",
-    "description": "Sensirion SCD41 I2C driver",
+    "description": "SCD41 I2C driver",
     "license": "MIT",
     "dependencies": {
         "core": "*"
