@@ -1,7 +1,10 @@
-// tests go here; this will not be compiled when this package is used as an extension.
-basic.forever(function () {
-    serial.writeValue("CO2", SCD41.get_co2());
-    serial.writeValue("T", SCD41.get_temperature(SCD41.SCD41_T_UNIT.C));
-    serial.writeValue("RH", SCD41.get_relative_humidity());
-    basic.pause(5000);
+input.onButtonPressed(Button.A, function () {
+    basic.showNumber(SCD41.get_temperature())
+})
+input.onButtonPressed(Button.B, function () {
+    basic.showNumber(SCD41.get_relative_humidity())
+})
+SCD41.set_altitude(0)
+loops.everyInterval(5000, function () {
+    basic.showNumber(SCD41.get_co2())
 })
