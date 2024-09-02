@@ -8,7 +8,7 @@
  * https://github.com/Sensirion/makecode-extension-scd41
  * 
  * Blocks have been renamed for compatability with other MonkMakes products
- * and new blocks have been added for altitude compensation and calibration.
+ * and new block has been added for altitude compensation.
  * 
  */
 
@@ -23,14 +23,12 @@ namespace SCD41 {
     let co2 = 0;
     let temperature = 0;
     let relative_humidity = 0;
+    let altitude_comp_factor = 1.0;
 
     let DATA_READY_COMMAND = 0xE4B8;
     let READ_MEASUREMENTS_COMMAND = 0xEC05;
     let START_CONT_MEASUREMENTS_COMMAND = 0x21b1;
     let STOP_CONT_MEASUREMENTS_COMMAND = 0x3F86;
-    let CALIBRATE_COMMAND = 0x362F;
-    let SET_ALTITUDE_COMMAND = 0x2427;
-    let GET_ALTITUDE_COMMAND = 0x2322;
     let FACTORY_RESET_COMMAND = 0x3632;
 
     start_continuous_measurement();
@@ -43,57 +41,12 @@ namespace SCD41 {
 
     function read_words(number_of_words: number) {
         let buffer = pins.i2cReadBuffer(SCD41_I2C_ADDR, number_of_words * 3, false);
-        let words:number[] = [];
+        let words: number[] = [];
         for (let i = 0; i < number_of_words; i++) {
-            words.push(buffer.getNumber(NumberFormat.UInt16BE, 3*i));
+            words.push(buffer.getNumber(NumberFormat.UInt16BE, 3 * i));
         }
         return words;
     }
-
-    function calc_crc(word: number) {
-        // You can thank Chat GTP for this function
-        // Define the CRC-8 polynomial and initial value
-        const polynomial = 0x31;  // CRC-8 polynomial (x^8 + x^2 + x + 1)
-        let crc = 0xFF;           // Initial CRC value (you may change this depending on the standard)
-    
-        // Break the 16-bit word into two bytes
-        const highByte = (word >> 8) & 0xFF; // Extract the high byte
-        const lowByte = word & 0xFF;         // Extract the low byte
-    
-        // Process the high byte
-        crc ^= highByte;
-        for (let i = 0; i < 8; i++) {
-            if (crc & 0x80) {
-                crc = (crc << 1) ^ polynomial;
-            } else {
-                crc <<= 1;
-            }
-            crc &= 0xFF; // Ensure CRC remains 8-bit
-        }
-    
-        // Process the low byte
-        crc ^= lowByte;
-        for (let i = 0; i < 8; i++) {
-            if (crc & 0x80) {
-                crc = (crc << 1) ^ polynomial;
-            } else {
-                crc <<= 1;
-            }
-            crc &= 0xFF; // Ensure CRC remains 8-bit
-        }
-    
-        return crc;
-    }
-
-    function sendCommand(command:number, param:number) {
-        // Sends a command along with arguments and CRC (CRC on params only)
-        // 2 byte command, 2 byte param, single byte CRC
-        let crc = calc_crc(param) 
-        pins.i2cWriteNumber(SCD41_I2C_ADDR, command, NumberFormat.UInt16BE, false)
-        pins.i2cWriteNumber(SCD41_I2C_ADDR, param, NumberFormat.UInt16BE, false)
-        pins.i2cWriteNumber(SCD41_I2C_ADDR, crc, NumberFormat.UInt8BE, false)
-    }
-
 
     function get_data_ready_status() {
         pins.i2cWriteNumber(SCD41_I2C_ADDR, DATA_READY_COMMAND, NumberFormat.UInt16BE);
@@ -110,10 +63,10 @@ namespace SCD41 {
         pins.i2cWriteNumber(SCD41_I2C_ADDR, READ_MEASUREMENTS_COMMAND, NumberFormat.UInt16BE);
         basic.pause(1);
         let values = read_words(6);
-        co2 = values[0];
+        co2 = values[0] * altitude_comp_factor;
         let adc_t = values[1];
         let adc_rh = values[2];
-        temperature =  -45 + (175 * adc_t / (1 << 16));
+        temperature = -45 + (175 * adc_t / (1 << 16));
         relative_humidity = 100 * adc_rh / (1 << 16);
     }
 
@@ -155,7 +108,7 @@ namespace SCD41 {
     //% weight=80 blockGap=8
     export function get_temperature() {
         read_measurement();
-        return temperature;   
+        return temperature;
     }
 
     /**
@@ -168,30 +121,27 @@ namespace SCD41 {
         return relative_humidity;
     }
 
-    /**
-     * Calibrate to 400 ppm
-     */
-    //% blockId="SCD41_CALIBRATE_400" block="calibrate 400"
-    //% advanced=true
-    //% weight=80 blockGap=8
-    export function calibrate_400() {
-        //stop_continuous_measurement();
-        sendCommand(CALIBRATE_COMMAND, 400);
-        //start_continuous_measurement();
-    }
 
     /**
      * Set Altitude Compensation
-     * @param m the altitude in metres
+     *  @param m the altitude in metres
      */
     //% blockId="SCD41_SET_ALT" block="set altitude"
+    //% block="altitude %m metres"
     //% advanced=true
     //% weight=80 blockGap=8
-    export function set_altitude(m:number) {
-        //stop_continuous_measurement();
-        sendCommand(SET_ALTITUDE_COMMAND, m);
-        //start_continuous_measurement();
+    export function set_altitude(m: number): void {
+        if (m > 4000) {
+            m = 4000;
+        }
+        if (m < 0) {
+            m = 0;
+        }
+        let excessKPa = m / 100; // pressure decreases 10kPa / km - linear approx upto 4km
+        altitude_comp_factor = 1 + excessKPa * 0.016; // 1.6% / kPa
+        console.log("excessKpa=" + excessKPa + " comp=" + altitude_comp_factor);
     }
+
 
     /**
      * Perform a factory reset
@@ -201,6 +151,7 @@ namespace SCD41 {
     //% weight=80 blockGap=8
     export function perform_factory_reset() {
         // no call to persist settings needed 
+        altitude_comp_factor = 1.0;
         pins.i2cWriteNumber(SCD41_I2C_ADDR, FACTORY_RESET_COMMAND, NumberFormat.UInt16BE);
     }
 }
