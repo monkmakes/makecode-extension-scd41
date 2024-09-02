@@ -1,6 +1,6 @@
 {
-    "name": "MonkMakes CO2 Dock / SCD41",
-    "version": "0.1.0",
+    "name": "MonkMakes CO2 Dock SCD41",
+    "version": "0.2.0",
     "description": "SCD41 I2C driver",
     "license": "MIT",
     "dependencies": {
