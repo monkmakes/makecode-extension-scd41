@@ -2,6 +2,8 @@
 
 Makecode extension for the MonkMakes [CO2 Dock](https://monkmakes.com/co2_dock) using the SCD41 Sensiron sensor over I2C with the micro:bit.
 
+![](demo.png)
+
 Please feel free to use this extension for non-MonkMakes products.
 
 
@@ -13,7 +15,7 @@ https://github.com/monkmakes/makecode-extension-scd41
 
 ## Demo
 
-![](demo.png)
+![](co2_dock.jpg)
 
 
 
