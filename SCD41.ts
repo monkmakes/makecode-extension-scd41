@@ -24,6 +24,7 @@ namespace SCD41 {
     let temperature = 0;
     let relative_humidity = 0;
     let altitude_comp_factor = 1.0;
+    let has_factory_reset = false
 
     let DATA_READY_COMMAND = 0xE4B8;
     let READ_MEASUREMENTS_COMMAND = 0xEC05;
@@ -63,7 +64,7 @@ namespace SCD41 {
         pins.i2cWriteNumber(SCD41_I2C_ADDR, READ_MEASUREMENTS_COMMAND, NumberFormat.UInt16BE);
         basic.pause(1);
         let values = read_words(6);
-        co2 = values[0] * altitude_comp_factor;
+        co2 = Math.round(values[0] * altitude_comp_factor);
         let adc_t = values[1];
         let adc_rh = values[2];
         temperature = -45 + (175 * adc_t / (1 << 16));
@@ -151,6 +152,10 @@ namespace SCD41 {
     //% weight=80 blockGap=8
     export function perform_factory_reset() {
         // no call to persist settings needed 
+        if (has_factory_reset) {
+            return; // can only do this once between resets to save SCD41's eeprom
+        }
+        has_factory_reset = true;
         altitude_comp_factor = 1.0;
         pins.i2cWriteNumber(SCD41_I2C_ADDR, FACTORY_RESET_COMMAND, NumberFormat.UInt16BE);
     }
